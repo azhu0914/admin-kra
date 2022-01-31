@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package goods.v1;
+
+option go_package = "api/goods/v1;v1";
+option java_multiple_files = true;
+option java_package = "goods.api.v1";
+
+import "google/api/annotations.proto";
+import "errors/errors.proto";
+// the validate rules:
+// https://github.com/envoyproxy/protoc-gen-validate
+import "validate/validate.proto";
+
+service GoodsService {
+	rpc Login (LoginReq) returns (LoginReply) {
+		option (google.api.http) = {
+			post: "/v1/login"
+			body: "*"
+		};
+	}
+	rpc CreateGoods (CreateGoodsRequest) returns (CreateGoodsReply) {
+		option (google.api.http) = {
+			post: "/v1/goods/add"
+			body: "*"
+		};
+	}
+	rpc UpdateGoods (UpdateGoodsRequest) returns (UpdateGoodsReply) {
+		option (google.api.http) = {
+			put: "/v1/goods/{id}"
+			body: "*"
+		};
+	}
+	rpc DeleteGoods (DeleteGoodsRequest) returns (DeleteGoodsReply) {
+		option (google.api.http) = {
+			delete: "/v1/goods/{id}"
+		};
+	}
+	rpc GetGoods (GetGoodsRequest) returns (GetGoodsReply) {
+		option (google.api.http) = {
+			get: "/v1/goods/{id}"
+		};
+	}
+	rpc ListGoods (ListGoodsRequest) returns (ListGoodsReply) {
+		option (google.api.http) = {
+			get: "/v1/goods/"
+		};
+	}
+}
+enum ErrorReason {
+	// 设置缺省错误码
+	option (errors.default_code) = 500;
+
+	// 为某个枚举单独设置错误码
+	WS_NOT_FOUND = 0 [(errors.code) = 404];
+
+	CONTENT_MISSING = 1 [(errors.code) = 400];;
+
+	LOGIN_FAILED = 3 [(errors.code) = 401];
+
+	CREATE_WHOLESALE_DRUG = 4 [(errors.code) = 201];
+}
+message Goods {
+	int64 id = 1;
+	int64 provider_id = 2;
+	int64 drug_id = 3;
+	string drug_name = 4;
+}
+
+message CreateGoodsRequest {
+	int64 theme_id = 1;
+	int64 wholesale_id = 2;
+	int64 copy_id = 3;
+	string filename = 4;
+}
+
+message CreateGoodsReply {
+	Goods Goods = 1;
+}
+
+message UpdateGoodsRequest {
+	int64 id = 1 [(validate.rules).int64 = {gt: 0}];
+	string drug_name = 2 [(validate.rules).string = {min_len: 1, max_len: 63}]; // the drug_name of string must be between 1 and 63 character;
+}
+
+message UpdateGoodsReply {
+	Goods Goods = 1;
+}
+
+message DeleteGoodsRequest {
+	int64 id = 1;
+}
+message DeleteGoodsReply {
+}
+
+
+message GetGoodsRequest {
+	int64 id = 1 [(validate.rules).int64 = {gt: 0}];
+}
+
+message GetGoodsReply {
+	Goods Goods = 1;
+	int32 code = 2;
+	string msg = 3;
+}
+
+message ListGoodsRequest {
+}
+
+message ListGoodsReply {
+	repeated Goods results = 1;
+	int32 code = 2;
+	string msg = 3;
+}
+
+message LoginReq {
+	string username = 1;
+	string password = 2;
+}
+
+message LoginReply {
+	string token = 1;
+}
+

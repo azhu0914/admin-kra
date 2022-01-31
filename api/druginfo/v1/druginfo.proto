@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package druginfo.v1;
+
+option go_package = "api/druginfo/v1;v1";
+option java_multiple_files = true;
+option java_package = "druginfo.api.v1";
+
+
+import "errors/errors.proto";
+// the validate rules:
+// https://github.com/envoyproxy/protoc-gen-validate
+import "validate/validate.proto";
+
+service Druginfos{
+  rpc CreateDrug (CreateDrugRequest) returns (GetDrugReply) {
+//    option (google.api.http) = {
+//      post: "/v1/druginfo/add"
+//      body: "*"
+//    };
+  }
+  rpc UpdateDrug (UpdatedruginfoRequest) returns (UpdatedruginfoReply) {
+//    option (google.api.http) = {
+//      put: "/v1/druginfo/{id}"
+//      body: "*"
+//    };
+  }
+  
+  rpc GetDrug (GetDrugRequest) returns (GetDrugReply) {
+//    option (google.api.http) = {
+//      get: "/v1/druginfo/{id}"
+//    };
+  }
+  rpc Listdruginfo (ListdruginfoRequest) returns (ListdruginfoReply) {
+//    option (google.api.http) = {
+//      get: "/v1/druginfo/"
+//    };
+  }
+}
+enum ErrorReason {
+  // 设置缺省错误码
+  option (errors.default_code) = 500;
+
+  // 为某个枚举单独设置错误码
+  DRUG_NOT_FOUND = 0 [(errors.code) = 404];
+  
+}
+message Druginfo {
+  int64 id = 1;
+  string cn_name = 2;
+}
+
+message CreateDrugRequest {
+  string cn_name = 1;
+}
+
+message UpdatedruginfoRequest {
+  int64 id = 1 [(validate.rules).int64 = {gt: 0}];
+  string drug_name = 2 [(validate.rules).string = {min_len: 1, max_len: 63}]; // the drug_name of string must be between 1 and 63 character;
+}
+
+message UpdatedruginfoReply {
+  Druginfo druginfo = 1;
+}
+
+
+message GetDrugRequest {
+  int64 id = 1 [(validate.rules).int64 = {gt: 0}];
+}
+
+message GetDrugReply {
+  Druginfo druginfo = 1;
+  int32 code = 2;
+  string msg = 3;
+}
+
+message ListdruginfoRequest {
+}
+
+message ListdruginfoReply {
+  repeated Druginfo results = 1;
+  int32 code = 2;
+  string msg = 3;
+}
+
+
+
